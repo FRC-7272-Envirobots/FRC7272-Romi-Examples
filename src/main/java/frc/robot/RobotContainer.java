@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commandgroups.DriveASquare;
 import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.DriveForwardInches;
-import frc.robot.commands.DriveForwardTankInches;
+import frc.robot.commands.DriveForwardInchesGyroStraightPID;
 import frc.robot.commands.DriveTurnDegrees;
 import frc.robot.commands.DriveTurnDegreesGyro;
 import frc.robot.commands.DriveTurnDegreesGyroPID;
@@ -33,19 +33,20 @@ public class RobotContainer {
 
   private final DriveForwardInches forward3in = new DriveForwardInches(m_romiDrivetrain, 3, .5);
   private final DriveForwardInches backward3in = new DriveForwardInches(m_romiDrivetrain, 3, -.5);
-  //private final DriveTurnDegrees right90degrees = new DriveTurnDegrees(m_romiDrivetrain, 90, .5);
-  //private final DriveTurnDegrees left90degrees = new DriveTurnDegrees(m_romiDrivetrain, -90, .5);
+  private final DriveTurnDegrees right90degrees = new DriveTurnDegrees(m_romiDrivetrain, 90, .5);
+  private final DriveTurnDegrees left90degrees = new DriveTurnDegrees(m_romiDrivetrain, -90, .5);
 
-  private final DriveASquare squareDrive = new DriveASquare(m_romiDrivetrain);
-  private final DriveForwardTankInches tankForward = new DriveForwardTankInches(m_romiDrivetrain, 6, .5);
-  //private final DriveTurnDegreesGyro gyroTurn = new DriveTurnDegreesGyro(m_romiDrivetrain, 90, .5);
-  private final DriveTurnDegreesGyroPID gyroPidTurnCont = new DriveTurnDegreesGyroPID(m_romiDrivetrain, 90, .5, true);
-  private final DriveTurnDegreesGyroPID gyroPidTurnRightOnce = new DriveTurnDegreesGyroPID(m_romiDrivetrain, 90, .7, false);
-  private final DriveTurnDegreesGyroPID gyroPidTurnLeftOnce = new DriveTurnDegreesGyroPID(m_romiDrivetrain, -90, .7, false);
-
+  // private final DriveASquare squareDrive = new DriveASquare(m_romiDrivetrain);
+  private final DriveTurnDegreesGyro gyroTurn = new DriveTurnDegreesGyro(m_romiDrivetrain, 90, .25);
+  private final DriveTurnDegreesGyroPID gyroPidTurnRightCont = new DriveTurnDegreesGyroPID(m_romiDrivetrain, 90, .5, true);
+  private final DriveTurnDegreesGyroPID gyroPidTurnRightOnce = new DriveTurnDegreesGyroPID(m_romiDrivetrain, 90, .7,
+      false);
+  private final DriveTurnDegreesGyroPID gyroPidTurnLeftOnce = new DriveTurnDegreesGyroPID(m_romiDrivetrain, -90, .7,
+      false);
+  private final DriveForwardInchesGyroStraightPID driveForwardInchesGyro = new DriveForwardInchesGyroStraightPID(m_romiDrivetrain, 24, .7);
 
   /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
+   * F The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     // Configure the button bindings
@@ -72,10 +73,10 @@ public class RobotContainer {
     buttonB.whenPressed(gyroPidTurnRightOnce);
     buttonX.whenPressed(gyroPidTurnLeftOnce);
     buttonY.whenPressed(backward3in);
-    buttonL.whenPressed(squareDrive);
-    buttonR.whenPressed(tankForward);
+    buttonL.whenPressed(driveForwardInchesGyro);
+    buttonR.whenPressed(right90degrees);
     buttonBack.whenPressed(gyroPidTurnRightOnce);
-    buttonStart.whenPressed(gyroPidTurnCont);
+    buttonStart.whenPressed(gyroPidTurnRightCont);
   }
 
   /**

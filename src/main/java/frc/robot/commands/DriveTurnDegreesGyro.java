@@ -43,21 +43,20 @@ public class DriveTurnDegreesGyro extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drivetrain.arcadeDrive(0, degrees > 0 ? speed * -1 : speed);
+    drivetrain.arcadeDrive(0, degrees > 0 ? speed : speed * -1);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println(MessageFormat.format("Ended {0}", this.getName()));
+    System.out.println(MessageFormat.format("Ended {0}. Current Degrees {1}", this.getName(), drivetrain.getAngle()));
     drivetrain.arcadeDrive(0, 0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-
-    System.out.println(MessageFormat.format("Current Angle {0} degrees", drivetrain.getAngle()));
+    //System.out.println(MessageFormat.format("Current Angle {0} degrees", drivetrain.getAngle()));
     return Math.abs(drivetrain.getAngle()) >= Math.abs(degrees);
   }
 }

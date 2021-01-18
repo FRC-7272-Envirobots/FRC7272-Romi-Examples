@@ -48,7 +48,7 @@ public class DriveTurnDegreesGyroPID extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double curr_angle = drivetrain.getAngle();
+    double curr_angle = drivetrain.getAngle() * -1;
     double pid_calc = pid.calculate(curr_angle, degrees)/100;
  
     double speed;
@@ -59,7 +59,7 @@ public class DriveTurnDegreesGyroPID extends CommandBase {
     }
 
     drivetrain.arcadeDrive(0, speed);
-    System.out.println(MessageFormat.format("current gyro angle, speed {0}\t{1}", curr_angle,speed));
+    System.out.println(MessageFormat.format("current gyro angle, speed {0}\t{1}", curr_angle, speed));
   }
 
   // Called once the command ends or is interrupted.
@@ -76,7 +76,7 @@ public class DriveTurnDegreesGyroPID extends CommandBase {
       return false;
     }
     if(pid.atSetpoint()) {
-      System.out.println(MessageFormat.format("Ending {0}, current angle: {1}", this.getName(), Math.abs(drivetrain.getAngle())));
+      System.out.println(MessageFormat.format("Ending {0}, current angle: {1}", this.getName(), drivetrain.getAngle()));
       return true;
     }
     return false;

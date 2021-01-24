@@ -8,39 +8,42 @@ import frc.robot.subsystems.RomiDrivetrain;
 
 import java.text.MessageFormat;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /** An example command that uses an example subsystem. */
-public class DriveTurnDegreesGyroPID extends CommandBase {
+public class DriveTurnNetworkTableAnglePID extends CommandBase {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
 
   private final RomiDrivetrain drivetrain;
 
-  double degrees;
   double speed;
   boolean continuous;
   PIDController pid;
+  NetworkTableEntry angleEntry;
+  NetworkTableEntry objectCountEntry;
 
   /**
-   * Turns a specific number of degrees based on gyro readings, using PID to stop at the angle and correct under/over shooting the target angle
+   * Turns an angle (using PID + gyro) by reading correction values stored in a network table entry
    *
    * @param drivetrain instance of RomiDrivetrain
-   * @param degrees number of degrees to turn, use positive to turn right, negative to turn left.
-   * @param speed the Proportion to use in the PID calculation, use positive only (negative will change direction of angle turn).
-   * @param continuous if true, will not end command on target and continue running PID indefinately.
+   * @param angleEntry NetworkTableEntry that contains a double value for angle correction.
+   * @param objectCountEntry NetworkTableEntry that contains the number of detected objects in the vision program.
    */
-  public DriveTurnDegreesGyroPID(RomiDrivetrain drivetrain, double degrees, double speed, boolean continuous) {
-    // I've seen many teams never set any ID values unless they are needed (never meeting target, too much oscillation).
+  public DriveTurnNetworkTableAnglePID(RomiDrivetrain drivetrain, NetworkTableEntry angleEntry,
+      NetworkTableEntry objectCountEntry, double speed, boolean continuous) {
     this.pid = new PIDController(speed, 0, 0);
-
+    
     //within 1 degree of target with 10 data samples
     this.pid.setTolerance(1, 10);
 
     this.drivetrain = drivetrain;
-    this.degrees = degrees;
     this.speed = speed;
     this.continuous = continuous;
+    this.angleEntry = angleEntry;
+    this.objectCountEntry = objectCountEntry;
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrain);
   }
@@ -49,24 +52,31 @@ public class DriveTurnDegreesGyroPID extends CommandBase {
   @Override
   public void initialize() {
     System.out.println(MessageFormat.format("Started {0}", this.getName()));
-    drivetrain.resetAngle();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double curr_angle = drivetrain.getAngle();
-    double pid_calc = pid.calculate(curr_angle, degrees)/100;
- 
+    int objectCount = objectCountEntry.getNumber(0).intValue();
+
+    // Don't drive or calculate pid if there multiple objects detected.
+    // The vision program is likely confused on its target and may need to be calibrated.
+    if (objectCount > 1) {
+      return;
+    }
+
+    double curr_angle = angleEntry.getDouble(0) * -1;
+    double pid_calc = pid.calculate(curr_angle, 0) / 100;
+
     double speed;
-    if(pid_calc < 0) {
+    if (pid_calc < 0) {
       speed = Math.min(pid_calc, -.25);
     } else {
       speed = Math.max(pid_calc, .25);
     }
 
     drivetrain.arcadeDrive(0, speed);
-    System.out.println(MessageFormat.format("current gyro angle, speed {0}\t{1}", curr_angle, speed));
+    System.out.println(MessageFormat.format("current network table angle, speed {0}\t{1}", curr_angle, speed));
   }
 
   // Called once the command ends or is interrupted.
@@ -81,11 +91,11 @@ public class DriveTurnDegreesGyroPID extends CommandBase {
   public boolean isFinished() {
     // continuous=true mode is useful for debugging PID calibration
     // with some work it could also be used for autonomous to make sure the robot is still on target angle (corrected when bumped).
-    if(continuous) {
+    if (continuous) {
       return false;
     }
 
-    if(pid.atSetpoint()) {
+    if (pid.atSetpoint()) {
       System.out.println(MessageFormat.format("Ending {0}, current angle: {1}", this.getName(), drivetrain.getAngle()));
       return true;
     }

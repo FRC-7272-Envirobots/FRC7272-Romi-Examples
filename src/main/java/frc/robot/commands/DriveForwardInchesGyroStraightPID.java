@@ -21,13 +21,20 @@ public class DriveForwardInchesGyroStraightPID extends CommandBase {
   double speed;
 
   /**
-   * Creates a new ExampleCommand.
+   * Combines the most sensors in an attempt to do completely straight driving with course correction (if bumped) to ensure robot always drives straight.
+   * This command uses encoders to measure the inches to drive, as well as a PID-enable gyro to make sure the robot heading stays at angle 0.
    *
-   * @param subsystem The subsystem used by this command.
+   * @param drivetrain instance of RomiDrivetrain
+   * @param inches number of inches to drive
+   * @param speed the speed (-1 to 1) to drive, use negative to drive backwards.
+   * 
    */
   public DriveForwardInchesGyroStraightPID(RomiDrivetrain drivetrain, double inches, double speed) {
     this.pid = new PIDController(speed, 0, 0);
+    
+    //within 1 degree of target with 10 data samples
     this.pid.setTolerance(1, 10);
+
     this.drivetrain = drivetrain;
     this.inches = inches;
     this.speed = speed;
@@ -49,19 +56,26 @@ public class DriveForwardInchesGyroStraightPID extends CommandBase {
   public void execute() {
     double pid_calc = pid.calculate(drivetrain.getAngle(), 0)  / 100;
     double curr_speed  = speed;
+
+    // If the robot has drive its distance but the command hasn't ended then
+    // the robot is not at the correct heading and still needs to adjust angle with PID
     if(isDistanceMet()) {
       curr_speed=0;
-
+      // With the Romi the wheels don't turn if speed is less than 1/4 of power.
       if(pid_calc < 0) {
         pid_calc = Math.min(pid_calc, -.25);
       } else {
         pid_calc = Math.max(pid_calc, .25);
       }
-
     }
-    double leftSpeed = curr_speed - pid_calc;
-    double rightSpeed = curr_speed + pid_calc;
+
+    // Offset the speed with pid angle correction adjustments
+    double leftSpeed = curr_speed + pid_calc;
+    double rightSpeed = curr_speed - pid_calc;
+    
+    //Debug the speed calculation
     System.out.println(MessageFormat.format("LeftSpeed: {0}, RightSpeed: {1}", leftSpeed, rightSpeed));
+    
     drivetrain.tankDrive(leftSpeed, rightSpeed);
   }
 
@@ -75,6 +89,7 @@ public class DriveForwardInchesGyroStraightPID extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    //Finish when the driving distance is met and the robot is at the correct heading.
     return isDistanceMet() && pid.atSetpoint();
   }
 

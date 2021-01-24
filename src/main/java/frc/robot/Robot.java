@@ -28,6 +28,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    //CameraServer.getInstance().startAutomaticCapture("rPi Camera 0", "/dev/video0"); //try using the name and video device path
   }
 
   /**
@@ -51,9 +52,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {
-    m_robotContainer.printGyroOffsets();
-  }
+  public void disabledPeriodic() {}
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -80,6 +79,10 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
+    // Always run the the DefaultDrive command to send joystick axis control to the drivetrain.
+    // In my opinion this is the most confusing part of FRC Command Based programming.
+    // Doing an action on button press is straight forward, but running iterative code has to be done this way.
+    // You can only have one default command per subsystem, so you need todo all iterative programming for that subsystem within one command.
     m_robotContainer.getDrivetrain().setDefaultCommand(m_robotContainer.getDefaultDrive());
   }
 
@@ -95,6 +98,10 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    // Print the average drift per second of all gyro measurements.
+    // It is useful to know & debug during programming commands how much the gyro is naturally changing in a way that may affect your code.
+    m_robotContainer.printGyroOffsets();
+  }
   
 }

@@ -10,7 +10,7 @@ import java.text.MessageFormat;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-/** An example command that uses an example subsystem. */
+
 public class DriveTurnDegreesGyro extends CommandBase {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
 
@@ -20,9 +20,12 @@ public class DriveTurnDegreesGyro extends CommandBase {
   double speed;
 
   /**
-   * Creates a new ExampleCommand.
+   * Turns a specific number of degrees based on gyro readings, stopping once the angle turned is greater/equal than desired.
+   * This command has a tendency to overshoot the desired angle if turning fast or if gyro latency is high.
    *
-   * @param subsystem The subsystem used by this command.
+   * @param drivetrain instance of RomiDrivetrain
+   * @param degrees number of degrees to turn, use positive to turn right, negative to turn left.
+   * @param speed the speed to drive, use positive only (negative will change direction of angle turn).
    */
   public DriveTurnDegreesGyro(RomiDrivetrain drivetrain, double degrees, double speed) {
     this.drivetrain = drivetrain;

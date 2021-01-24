@@ -21,10 +21,13 @@ public class RomiGyro {
   private double m_angleYOffset;
   private double m_angleZOffset;
 
+  // Seems like this is no longer needed.
+  // As of the 2021.2.1 release the drift is more acceptable without manually correcting/
+  // Previously I was getting about .5 angle drift per seconds which was affecting turning commands
   Timer timer = new Timer();
-  public static double angleDriftPerSecX = 3.523-0.003;
-  public static double angleDriftPerSecY = -0.149;
-  public static double angleDriftPerSecZ = 0.555;
+  public static double angleDriftPerSecX = 0;// 3.581;
+  public static double angleDriftPerSecY = 0;//-0.149
+  public static double angleDriftPerSecZ = 0;//0.555;
 
   /** Create a new RomiGyro. */
   public RomiGyro() {

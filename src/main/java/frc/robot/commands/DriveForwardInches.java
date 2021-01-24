@@ -13,47 +13,53 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 /** An example command that uses an example subsystem. */
 public class DriveForwardInches extends CommandBase {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
-  private final RomiDrivetrain m_subsystem;
+  private final RomiDrivetrain drivetrain;
 
   double inches;
   double speed;
 
   /**
-   * Creates a new ExampleCommand.
+   * Drive forward the specified number of inches at the specified speed based on encoder readings
    *
-   * @param subsystem The subsystem used by this command.
+   * @param drivetrain instance of RomiDrivetrain
+   * @param inches number of inches to drive
+   * @param speed the speed (-1 to 1) to drive, use negative to drive backwards.
+   * 
    */
-  public DriveForwardInches(RomiDrivetrain subsystem, double inches, double speed) {
-    this.m_subsystem = subsystem;
+  public DriveForwardInches(RomiDrivetrain drivetrain, double inches, double speed) {
+    this.drivetrain = drivetrain;
     this.inches = inches;
     this.speed = speed;
+    
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_subsystem);
+    addRequirements(drivetrain);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     System.out.println(MessageFormat.format("Started {0}", this.getName()));
-    m_subsystem.resetEncoders();
+    drivetrain.resetEncoders();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_subsystem.arcadeDrive(speed, 0);
+    drivetrain.arcadeDrive(speed, 0);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     System.out.println(MessageFormat.format("Ended {0}", this.getName()));
-    m_subsystem.arcadeDrive(0, 0);
+    drivetrain.arcadeDrive(0, 0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(m_subsystem.getLeftDistanceInch()) > inches && Math.abs(m_subsystem.getRightDistanceInch()) > inches;
+    // Using absolute to measure change of distance with encoders, and not direction.
+    // I chose to handle direction with pos/neg speed.
+    return Math.abs(drivetrain.getLeftDistanceInch()) > inches && Math.abs(drivetrain.getRightDistanceInch()) > inches;
   }
 }
